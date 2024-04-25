@@ -66,33 +66,11 @@ def update_graphs(selected_sensors, start_date, end_date):
         )
     time_series_fig.update_layout(title="Time Series of Selected Sensors")
 
-    # Correlation Heatmap
-    correlation_fig = go.Figure(
-        go.Heatmap(
-            z=filtered_data[selected_sensors].corr(),
-            x=selected_sensors,
-            y=selected_sensors,
-            colorscale='Viridis'
-        )
-    )
-    correlation_fig.update_layout(title="Correlation Heatmap")
 
-    # Anomaly Score Chart
-    anomaly_score_fig = px.line(
-        filtered_data,
-        x='Date',
-        y='anomaly_score',
-        title="Anomaly Scores Over Time"
-    )
 
-    # Histogram of the selected sensor data
-    histogram_fig = go.Figure()
-    for sensor in selected_sensors:
-        histogram_fig.add_trace(go.Histogram(x=filtered_data[sensor], name=sensor))
-    histogram_fig.update_layout(title="Distribution of Sensor Readings")
 
-    return time_series_fig, correlation_fig, anomaly_score_fig, histogram_fig
+    return time_series_fig
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True,port=8070)
+    app.run_server(debug=True)
