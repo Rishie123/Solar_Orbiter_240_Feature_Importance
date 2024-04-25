@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
-solar_data = pd.read_csv("../Data/Solar_Orbiter_with_anomalies.csv")
+solar_data = pd.read_csv("../../Solar_Orbiter.csv")
 sensor_columns = solar_data.columns[1:-2]  # Exclude 'Date', 'anomaly', and 'anomaly_score'
 
 # Initialize the Dash app
