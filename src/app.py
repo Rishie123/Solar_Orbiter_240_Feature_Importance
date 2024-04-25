@@ -11,7 +11,7 @@ solar_data['Date'] = pd.to_datetime(solar_data['Date'])
 sensor_columns = solar_data.columns[1:-2]  # Exclude 'Date', 'anomaly', and 'anomaly_score'
 
 # Initialize the Dash app
-app = dash.Dash(__name__, title="Advanced Solar Orbiter Data Visualization", external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css')
+app = dash.Dash(__name__, title="Advanced Solar Orbiter Data Visualization", external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 server=app.server
 
 # Layout of the Dash app, with four major sections
