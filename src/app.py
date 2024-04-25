@@ -31,21 +31,14 @@ app.layout = html.Div([
     ),
     html.Div([
         html.Div([dcc.Graph(id='time-series-chart')], className="six columns"),
-        html.Div([dcc.Graph(id='correlation-heatmap')], className="six columns"),
+    
     ], className="row"),
-    html.Div([
-        html.Div([dcc.Graph(id='anomaly-score-chart')], className="six columns"),
-        html.Div([dcc.Graph(id='sensor-histogram')], className="six columns"),
-    ], className="row"),
-    html.Div(id='anomaly-stats', style={'margin-top': '20px', 'text-align': 'center'})
+
 ])
 
 # Callbacks to update graphs
 @app.callback(
-    [Output('time-series-chart', 'figure'),
-     Output('correlation-heatmap', 'figure'),
-     Output('anomaly-score-chart', 'figure'),
-     Output('sensor-histogram', 'figure')],
+    [Output('time-series-chart', 'figure'),],
     [Input('sensor-checklist', 'value'),
      Input('date-picker-range', 'start_date'),
      Input('date-picker-range', 'end_date')]
