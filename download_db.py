@@ -75,7 +75,7 @@ def download_database():
 
 if __name__ == "__main__":
     download_database()
-'  # Google Drive file ID
+ # Google Drive file ID
         destination = db_file
         download_file_from_google_drive(file_id, destination)
         print("Database downloaded successfully.")
