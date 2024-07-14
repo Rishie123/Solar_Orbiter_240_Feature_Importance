@@ -2,5 +2,6 @@ dash==2.16.1
 numpy==1.24.4
 pandas==1.5.3
 plotly==5.21.0
+sqlalchemy
 gunicorn
 dash-tools
