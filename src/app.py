@@ -1,70 +1,78 @@
+import os
 import dash
-from dash import dcc, html, dash_table
+import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from sqlalchemy import create_engine
 import pandas as pd
-import numpy as np
+from download_db import download_database
 
-solar_data = pd.read_csv("Solar_Orbiter_with_anomalies.csv")
-solar_data['Date'] = pd.to_datetime(solar_data['Date'])
-sensor_columns = solar_data.columns[1:-2]  # Exclude 'Date', 'anomaly', and 'anomaly_score'
+# Ensure the database is downloaded
+download_database()
 
-# Initialize the Dash app
-app = dash.Dash(__name__, title="Advanced Solar Orbiter Data Visualization", external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
-server=app.server
+# Correct database path
+db_file = 'all_data_scaled.db'
+engine = create_engine(f'sqlite:///{db_file}')
 
-# Layout of the Dash app, with four major sections
+app = dash.Dash(__name__)
+server = app.server
+
+# Fetch unique dates from the features table
+features = pd.read_sql('SELECT * FROM features', engine)
+unique_dates = features['Date'].unique()
+
 app.layout = html.Div([
-    html.H1("Solar Orbiter Instrument Data Visualization", style={'text-align': 'center'}),
-    dcc.Checklist(
-        id='sensor-checklist',
-        options=[{'label': col, 'value': col} for col in sensor_columns],
-        value=[sensor_columns[0]],
-        inline=True
+    html.H1("R, T, N values for Magnetic Field for Out Board Sensor on Perihilon Dates with & without Machine Learning"),
+    dcc.Dropdown(
+        id='date-dropdown',
+        options=[{'label': date, 'value': date} for date in unique_dates],
+        value=['2023-10-07', '2023-04-10', '2022-06-26', '2022-10-12'],  # default dates
+        multi=True
     ),
-    dcc.DatePickerRange(
-        id='date-picker-range',
-        min_date_allowed=solar_data['Date'].min(),
-        max_date_allowed=solar_data['Date'].max(),
-        start_date=solar_data['Date'].min(),
-        end_date=solar_data['Date'].max()
-    ),
-    html.Div([
-        html.Div([dcc.Graph(id='time-series-chart')], className="six columns"),
-    
-    ], className="row"),
-
+    dcc.Graph(id='magnetic-field-graph')
 ])
 
-# Callbacks to update graphs
 @app.callback(
-    [Output('time-series-chart', 'figure'),],
-    [Input('sensor-checklist', 'value'),
-     Input('date-picker-range', 'start_date'),
-     Input('date-picker-range', 'end_date')]
+    Output('magnetic-field-graph', 'figure'),
+    Input('date-dropdown', 'value')
 )
-def update_graphs(selected_sensors, start_date, end_date):
-    filtered_data = solar_data[(solar_data['Date'] >= start_date) & (solar_data['Date'] <= end_date)]
+def update_graph(selected_dates):
+    if not selected_dates:
+        return go.Figure()
+
+    fig = make_subplots(rows=2, cols=len(selected_dates), shared_xaxes=True, shared_yaxes=True)
     
-    # Time Series Chart
-    time_series_fig = go.Figure()
-    for sensor in selected_sensors:
-        time_series_fig.add_trace(
-            go.Scatter(
-                x=filtered_data['Date'],
-                y=filtered_data[sensor],
-                mode='lines+markers',
-                name=sensor
+    components = ['R', 'T', 'N']
+    colors = ['red', 'green', 'orange']
+    
+    for i, date in enumerate(selected_dates):
+        date_specific_data = features[features['Date'] == date]
+
+        for row in date_specific_data.itertuples():
+            # Query the required data from the database
+            query = f"SELECT * FROM all_data_scaled WHERE hp_id = {row.Index}"
+            selected_day = pd.read_sql(query, engine)
+            break  # Assuming we plot only the first sample per date
+
+        for j, component in enumerate(components):
+            showlegend = i == 0  # Show legend only for the first column
+            fig.add_trace(
+                go.Scatter(x=selected_day['Time'], y=selected_day[f'{component}_orig'], name=component, line=dict(color=colors[j]), showlegend=showlegend),
+                row=1, col=i+1
             )
-        )
-    time_series_fig.update_layout(title="Time Series of Selected Sensors")
+            fig.add_trace(
+                go.Scatter(x=selected_day['Time'], y=selected_day[f'{component}_pred_orig'], name=component, line=dict(color=colors[j]), showlegend=False),
+                row=2, col=i+1
+            )
+        fig.update_xaxes(title_text="Time (seconds)", row=2, col=i+1)
+    
+    fig.update_yaxes(title_text="Real", row=1, col=1)
+    fig.update_yaxes(title_text="Pred", row=2, col=1)
+    fig.update_layout(height=600, title_text="R, T, N values for Magnetic Field")
 
+    return fig
 
-
-
-    return [time_series_fig]
-
-# Run the app
 if __name__ == '__main__':
     app.run_server(debug=True)
