@@ -30,7 +30,8 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 def download_database():
-    db_file = 'all_data_scaled.db'
+    # Adjust the path to ensure the database is downloaded to the desired location
+    db_file = os.path.join(os.path.dirname(__file__), '..', 'all_data_scaled.db')
     if not os.path.exists(db_file):
         print("Database not found. Downloading...")
         file_id = '1LuIkYQToXivEGHfn3v3dk8yq2qWD7gZm'  # Verified Google Drive file ID
