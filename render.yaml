@@ -1,7 +1,7 @@
 services:
   # See https://render.com/docs/blueprint-spec for more info on render blueprints
   - type: web
-    name: Solar_Orbiter_Instruments
+    name: My_Render
     env: python
     plan: free
     # A requirements.txt file must exist
