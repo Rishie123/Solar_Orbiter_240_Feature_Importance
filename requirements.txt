@@ -4,3 +4,4 @@ pandas
 plotly==5.21.0
 gunicorn
 dash-tools
+scickit-learn
