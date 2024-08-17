@@ -1,7 +1,6 @@
 dash==2.16.1
-numpy==1.24.4
+numpy
 pandas==1.5.3
 plotly==5.21.0
-scikit-learn
 gunicorn
 dash-tools
