@@ -1,3 +1,5 @@
+#!/bin/bash
+
 import pandas as pd  # Pandas for data manipulation
 import dash  # Dash library for creating web applications
 from dash import dcc, html, dash_table  # Components for building layout
