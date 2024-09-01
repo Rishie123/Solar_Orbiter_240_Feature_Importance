@@ -8,7 +8,6 @@ import pandas as pd
 # Load the combined DataFrame
 df = pd.read_csv('combined_feature_importances.csv')
 
-
 # Initialize the Dash app
 app = dash.Dash(__name__)
 server = app.server
@@ -34,8 +33,23 @@ def create_figure(data, title):
 types = ['IBS_R', 'IBS_N', 'IBS_T', 'OBS_R', 'OBS_N', 'OBS_T']
 figures = [create_figure(prepare_data(df, type_label), f'Cumulative Normalized Feature Importance of Heater Profiles {type_label}') for type_label in types]
 
-# Define the layout of the app to include a graph for each type
-app.layout = html.Div([dcc.Graph(figure=fig) for fig in figures])
+# Add Interval component to the layout and graphs
+app.layout = html.Div([
+    dcc.Interval(
+        id='interval-component',
+        interval=10*60*1000,  # 10 minutes in milliseconds
+        n_intervals=0  # initial value
+    ),
+    html.Div([dcc.Graph(figure=fig) for fig in figures])
+])
+
+# Callback to reload the page
+@app.callback(
+    dash.dependencies.Output('interval-component', 'n_intervals'),
+    [dash.dependencies.Input('interval-component', 'n_intervals')]
+)
+def refresh_page(n):
+    return n
 
 # Run the server
 if __name__ == '__main__':
